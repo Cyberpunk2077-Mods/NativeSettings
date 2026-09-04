@@ -1,27 +1,50 @@
-name: pack
-
+name: Build Mod Package
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: ["**"]
+    tags: ["v*"]
   workflow_dispatch:
-
+permissions:
+  contents: write
+env:
+  TARGET_PLATFORM: windows
+  TARGET_ARCH: x64
+  # Reserved, disabled targets: windows_arm, macos_x64, macos_arm, linux_x64, linux_arm.
+  MOD_NAME: NativeSettings
 jobs:
-  pack:
-    runs-on: ubuntu-latest
+  package:
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup folder
-        run: |
-          cd ${{ github.workspace }}
-          sudo mkdir -p /packed/bin/x64/plugins/cyber_engine_tweaks/mods/
-      - name: Copy files
-        run: |
-          sudo cp -r nativeSettings /packed/bin/x64/plugins/cyber_engine_tweaks/mods/
-      - name: Upload zip
-        uses: actions/upload-artifact@v2
+      - uses: actions/checkout@v4
         with:
-            name: nativeSettingsLatest
-            path: /packed/
+          fetch-depth: 0
+      - name: Resolve package name
+        id: meta
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            version="${GITHUB_REF_NAME#v}"; suffix=""
+          else
+            version="0.0.0"
+            patch="$(git rev-list --count --since="$(date -u +%Y-%m-01T00:00:00Z)" HEAD)"
+            suffix="_$(date -u +%Y).$((10#$(date -u +%m))).${patch:-1}"
+          fi
+          artifact="${MOD_NAME}_v${version}_${TARGET_PLATFORM}_${TARGET_ARCH}${suffix}.zip"
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+      - name: Build package
+        shell: bash
+        run: |
+          mkdir -p stage/bin/x64/plugins/cyber_engine_tweaks/mods
+          cp -R nativeSettings stage/bin/x64/plugins/cyber_engine_tweaks/mods/
+          cd stage && zip -9 -r "../${{ steps.meta.outputs.artifact }}" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact }}
+          path: ${{ steps.meta.outputs.artifact }}
+          if-no-files-found: error
+      - name: Create draft release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "${{ steps.meta.outputs.artifact }}" --draft --generate-notes --verify-tag
+
