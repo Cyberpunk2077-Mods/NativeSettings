@@ -2,6 +2,8 @@ local nativeSettings = {
     data = {},
 	currentTabPath = nil,
     fromMods = false,
+    modsButtonId = "Mods", -- Stable English identity; never use translated label for identity checks
+    modsDisplayLabel = "Mods",
     minCETVersion = 1.25,
     settingsMainController = nil,
     settingsOptionsList = nil,
@@ -20,7 +22,14 @@ local nativeSettings = {
     lastSettingsCategoryIndex = 0,
     fromInit = false,
     version = 1.96,
-    Cron = require("Cron")
+    Cron = require("Cron"),
+    Localization = require("localization"),
+    activeLocale = "en_US",
+    config = {
+        language = "auto",
+        languageConfigured = false,
+    },
+    languageSettingsRegistered = false,
 }
 
 registerForEvent("onInit", function()
@@ -35,6 +44,16 @@ registerForEvent("onInit", function()
         print(string.format("[NativeSettings] CET version is too low: %f, Minimum required is: %f", cetVer, nativeSettings.minCETVersion))
         return
     end
+
+    nativeSettings.loadConfig()
+    if not nativeSettings.config.languageConfigured then
+        -- First open: keep "auto" and match game interface language for chrome strings
+        nativeSettings.config.language = nativeSettings.config.language or "auto"
+        nativeSettings.config.languageConfigured = true
+        nativeSettings.saveConfig()
+    end
+    nativeSettings.applyLanguage()
+    nativeSettings.setupLanguageSettings()
 
     Observe("SettingsMainGameController", "OnInitialize", function (this) -- Hide buttons
         nativeSettings.fromInit = true
@@ -78,7 +97,8 @@ registerForEvent("onInit", function()
     Observe("gameuiMenuItemListGameController", "AddMenuItem", function (this, _, spawnEvent) -- Add "Mods" menu button
         if spawnEvent.value == "OnSwitchToSettings" then
             local data = PauseMenuListItemData.new()
-            data.label = "Mods"
+            -- Display label may be translated; identity checks use modsButtonId / isModsMenuLabel()
+            data.label = nativeSettings.modsDisplayLabel
             data.eventName = "OnSwitchToSettings"
             data.action = PauseMenuAction.OpenSubMenu
             this.menuListController:PushData(data)
@@ -86,11 +106,11 @@ registerForEvent("onInit", function()
     end)
 
     Observe("PauseMenuGameController", "OnMenuItemActivated", function (_, _, target) -- Check if activated button is the custom mods button
-        nativeSettings.fromMods = target:GetData().label == "Mods"
+        nativeSettings.fromMods = nativeSettings.isModsMenuLabel(target:GetData().label)
     end)
 
     Observe("gameuiMenuItemListGameController", "OnMenuItemActivated", function (_, _, target) -- Check if activated button is the custom mods button
-        nativeSettings.fromMods = target:GetData().label == "Mods"
+        nativeSettings.fromMods = nativeSettings.isModsMenuLabel(target:GetData().label)
     end)
 
     Observe("SettingsMainGameController", "RequestClose", function (this) -- Handle mod settings close
@@ -259,7 +279,7 @@ registerForEvent("onInit", function()
                 tabs = tabs + 1
             end
             if tabs == 0 then
-                nativeSettings.addTab("noMod", "No mods using NativeSettings installed!") -- Add something when there are no settings, to make it not bug out
+                nativeSettings.addTab("noMod", nativeSettings.Localization.get(nativeSettings.activeLocale, "no_mods")) -- Add something when there are no settings, to make it not bug out
             end
 
             this.data = {}
@@ -1450,6 +1470,155 @@ function nativeSettings.switchToPreviousPage(settingsController, fromPriorMenu)
         settingsController:PopulateCategories(idx)
     else
         settingsController:PopulateCategories(settingsController.settings:GetMenuIndex())
+    end
+end
+
+-- Identity check for the Mods menu button: English id stays stable even when display label is translated.
+function nativeSettings.isModsMenuLabel(label)
+    if label == nil then return false end
+    local labelStr = tostring(label)
+    return labelStr == nativeSettings.modsButtonId or labelStr == nativeSettings.modsDisplayLabel
+end
+
+function nativeSettings.loadConfig()
+    local defaults = {
+        language = "auto",
+        languageConfigured = false,
+    }
+
+    local file = io.open("config.json", "r")
+    if not file then
+        nativeSettings.config = defaults
+        return
+    end
+
+    local contents = file:read("*a")
+    file:close()
+
+    local ok, data = pcall(function() return json.decode(contents) end)
+    if not ok or type(data) ~= "table" then
+        nativeSettings.config = defaults
+        return
+    end
+
+    nativeSettings.config = {
+        language = data.language or "auto",
+        languageConfigured = data.languageConfigured == true,
+    }
+end
+
+function nativeSettings.saveConfig()
+    local payload = {
+        language = nativeSettings.config.language or "auto",
+        languageConfigured = nativeSettings.config.languageConfigured == true,
+    }
+
+    local ok, contents = pcall(function() return json.encode(payload) end)
+    if not ok or not contents then
+        print("[NativeSettings] Failed to encode config.json")
+        return
+    end
+
+    local file = io.open("config.json", "w")
+    if not file then
+        print("[NativeSettings] Failed to write config.json")
+        return
+    end
+
+    file:write(contents)
+    file:close()
+end
+
+function nativeSettings.applyLanguage()
+    local loc = nativeSettings.Localization
+    nativeSettings.activeLocale = loc.resolveLocale(nativeSettings.config.language)
+    nativeSettings.modsButtonId = loc.MODS_BUTTON_ID
+    nativeSettings.modsDisplayLabel = loc.get(nativeSettings.activeLocale, "mods")
+
+    if nativeSettings.data["noMod"] then
+        nativeSettings.data["noMod"].label = loc.get(nativeSettings.activeLocale, "no_mods")
+    end
+
+    if nativeSettings.data["nativeSettings"] then
+        nativeSettings.data["nativeSettings"].label = "Native Settings"
+        if nativeSettings.data["nativeSettings"].subcategories["ui"] then
+            nativeSettings.data["nativeSettings"].subcategories["ui"].label = loc.get(nativeSettings.activeLocale, "language")
+        end
+    end
+end
+
+-- Optional API: set UI language without changing addTab / widget signatures.
+-- language: "auto" | game code ("en-us") | locale id ("en_US")
+function nativeSettings.setLanguage(language)
+    if language == nil or language == "" then
+        language = "auto"
+    end
+
+    nativeSettings.config.language = tostring(language)
+    nativeSettings.config.languageConfigured = true
+    nativeSettings.applyLanguage()
+    nativeSettings.saveConfig()
+    nativeSettings.refreshLanguageSettingsWidgets()
+end
+
+function nativeSettings.getLanguage()
+    return nativeSettings.config.language or "auto"
+end
+
+function nativeSettings.getActiveLocale()
+    return nativeSettings.activeLocale or "en_US"
+end
+
+function nativeSettings.setupLanguageSettings()
+    if nativeSettings.languageSettingsRegistered then return end
+    nativeSettings.languageSettingsRegistered = true
+
+    local loc = nativeSettings.Localization
+    nativeSettings.addTab("/nativeSettings", "Native Settings")
+    nativeSettings.addSubcategory("/nativeSettings/ui", loc.get(nativeSettings.activeLocale, "language"))
+
+    local elements = loc.buildLanguageSelectorElements(nativeSettings.activeLocale)
+    local currentIndex = loc.languageToSelectorIndex(nativeSettings.config.language)
+
+    nativeSettings.languageOption = nativeSettings.addSelectorString(
+        "/nativeSettings/ui",
+        loc.get(nativeSettings.activeLocale, "language"),
+        loc.get(nativeSettings.activeLocale, "language_desc"),
+        elements,
+        currentIndex,
+        1,
+        function(value)
+            local selected = loc.selectorIndexToLanguage(value)
+            nativeSettings.config.language = selected
+            nativeSettings.config.languageConfigured = true
+            nativeSettings.applyLanguage()
+            nativeSettings.saveConfig()
+            nativeSettings.refreshLanguageSettingsWidgets()
+        end
+    )
+end
+
+function nativeSettings.refreshLanguageSettingsWidgets()
+    local loc = nativeSettings.Localization
+    local elements = loc.buildLanguageSelectorElements(nativeSettings.activeLocale)
+    local currentIndex = loc.languageToSelectorIndex(nativeSettings.config.language)
+
+    if nativeSettings.languageOption then
+        nativeSettings.languageOption.elements = elements
+        nativeSettings.languageOption.selectedElementIndex = currentIndex
+        nativeSettings.languageOption.label = loc.get(nativeSettings.activeLocale, "language")
+        nativeSettings.languageOption.desc = loc.get(nativeSettings.activeLocale, "language_desc")
+
+        if nativeSettings.languageOption.controller and IsDefined(nativeSettings.languageOption.controller) then
+            pcall(function()
+                nativeSettings.languageOption.controller.LabelText:SetText(nativeSettings.languageOption.label)
+                nativeSettings.languageOption.controller.ValueText:SetText(tostring(elements[currentIndex]))
+            end)
+        end
+    end
+
+    if nativeSettings.data["nativeSettings"] and nativeSettings.data["nativeSettings"].subcategories["ui"] then
+        nativeSettings.data["nativeSettings"].subcategories["ui"].label = loc.get(nativeSettings.activeLocale, "language")
     end
 end
 
