@@ -22,16 +22,17 @@ jobs:
         id: meta
         shell: bash
         run: |
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
             version="${GITHUB_REF_NAME#v}"; suffix=""
           else
-            version="$(git tag -l --sort=-v:refname | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)"
+            # grep exits 1 when no tags match; Actions uses pipefail, so tolerate that.
+            version="$(git tag -l --sort=-v:refname | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)"
             if [[ -z "$version" ]]; then
-              version="$(git tag -l --sort=-v:refname | grep -E '^v?[0-9]' | head -n1)"
+              version="$(git tag -l --sort=-v:refname | grep -E '^v?[0-9]' | head -n1 || true)"
             fi
             version="${version#v}"
             if [[ -z "$version" ]]; then
-              version="$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*\([0-9.][0-9.]*\).*/\1/p' nativeSettings/init.lua | head -n1)"
+              version="$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*\([0-9.][0-9.]*\).*/\1/p' nativeSettings/init.lua | head -n1 || true)"
             fi
             version="${version:-0.0.0}"
             patch="$(git rev-list --count --since="$(date -u +%Y-%m-01T00:00:00Z)" HEAD)"
