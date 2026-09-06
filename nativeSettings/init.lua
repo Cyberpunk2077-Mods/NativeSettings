@@ -97,8 +97,9 @@ registerForEvent("onInit", function()
     Observe("gameuiMenuItemListGameController", "AddMenuItem", function (this, _, spawnEvent) -- Add "Mods" menu button
         if spawnEvent.value == "OnSwitchToSettings" then
             local data = PauseMenuListItemData.new()
-            -- Display label may be translated; identity checks use modsButtonId / isModsMenuLabel()
-            data.label = nativeSettings.modsDisplayLabel
+            -- The game resolves this field as a localization key. Arbitrary translated text is treated as
+            -- a missing key and renders as an empty menu slot, so keep the built-in stable key here.
+            data.label = nativeSettings.modsButtonId
             data.eventName = "OnSwitchToSettings"
             data.action = PauseMenuAction.OpenSubMenu
             this.menuListController:PushData(data)
@@ -1540,7 +1541,7 @@ function nativeSettings.applyLanguage()
     end
 
     if nativeSettings.data["nativeSettings"] then
-        nativeSettings.data["nativeSettings"].label = "Native Settings"
+        nativeSettings.data["nativeSettings"].label = loc.get(nativeSettings.activeLocale, "settings")
         if nativeSettings.data["nativeSettings"].subcategories["ui"] then
             nativeSettings.data["nativeSettings"].subcategories["ui"].label = loc.get(nativeSettings.activeLocale, "language")
         end
@@ -1574,7 +1575,7 @@ function nativeSettings.setupLanguageSettings()
     nativeSettings.languageSettingsRegistered = true
 
     local loc = nativeSettings.Localization
-    nativeSettings.addTab("/nativeSettings", "Native Settings")
+    nativeSettings.addTab("/nativeSettings", loc.get(nativeSettings.activeLocale, "settings"))
     nativeSettings.addSubcategory("/nativeSettings/ui", loc.get(nativeSettings.activeLocale, "language"))
 
     local elements = loc.buildLanguageSelectorElements(nativeSettings.activeLocale)

@@ -32,27 +32,27 @@ for code, locale in pairs(Localization.gameCodeToLocale) do
     Localization.localeToGameCode[locale] = code
 end
 
--- Display names for the language selector (English labels for clarity)
+-- Native display names for the language selector.
 Localization.localeDisplayNames = {
-    ar_AR = "Arabic (ar-ar)",
-    cz_CZ = "Czech (cz-cz)",
-    de_DE = "German (de-de)",
+    ar_AR = "العربية (ar-ar)",
+    cz_CZ = "Čeština (cz-cz)",
+    de_DE = "Deutsch (de-de)",
     en_US = "English (en-us)",
-    es_ES = "Spanish (es-es)",
-    es_MX = "Spanish LatAm (es-mx)",
-    fr_FR = "French (fr-fr)",
-    hu_HU = "Hungarian (hu-hu)",
-    it_IT = "Italian (it-it)",
-    jp_JP = "Japanese (jp-jp)",
-    kr_KR = "Korean (kr-kr)",
-    pl_PL = "Polish (pl-pl)",
-    pt_BR = "Portuguese BR (pt-br)",
-    ru_RU = "Russian (ru-ru)",
-    th_TH = "Thai (th-th)",
-    tr_TR = "Turkish (tr-tr)",
-    ua_UA = "Ukrainian (ua-ua)",
-    zh_CN = "Chinese Simplified (zh-cn)",
-    zh_TW = "Chinese Traditional (zh-tw)",
+    es_ES = "Español (es-es)",
+    es_MX = "Español latinoamericano (es-mx)",
+    fr_FR = "Français (fr-fr)",
+    hu_HU = "Magyar (hu-hu)",
+    it_IT = "Italiano (it-it)",
+    jp_JP = "日本語 (jp-jp)",
+    kr_KR = "한국어 (kr-kr)",
+    pl_PL = "Polski (pl-pl)",
+    pt_BR = "Português do Brasil (pt-br)",
+    ru_RU = "Русский (ru-ru)",
+    th_TH = "ไทย (th-th)",
+    tr_TR = "Türkçe (tr-tr)",
+    ua_UA = "Українська (ua-ua)",
+    zh_CN = "简体中文 (zh-cn)",
+    zh_TW = "繁體中文 (zh-tw)",
 }
 
 Localization.localeOrder = {
@@ -60,13 +60,15 @@ Localization.localeOrder = {
     "jp_JP", "kr_KR", "pl_PL", "pt_BR", "ru_RU", "th_TH", "tr_TR", "ua_UA", "zh_CN", "zh_TW",
 }
 
-local function T(mods, noMods, language, languageDesc, auto)
+local function T(mods, noMods, language, languageDesc, auto, settings, none)
     return {
         mods = mods,
         no_mods = noMods,
         language = language,
         language_desc = languageDesc,
         auto = auto,
+        settings = settings,
+        none = none,
     }
 end
 
@@ -76,29 +78,31 @@ local en = T(
     "No mods using NativeSettings installed!",
     "UI Language",
     "Native Settings menu language. Auto follows the game interface language.",
-    "Auto (Game Language)"
+    "Auto (Game Language)",
+    "Native Settings",
+    "None"
 )
 
 Localization.strings = {
     en_US = en,
-    ar_AR = T("التعديلات", "لا توجد تعديلات تستخدم NativeSettings!", "لغة الواجهة", "لغة قائمة Native Settings. تلقائي يتبع لغة واجهة اللعبة.", "تلقائي (لغة اللعبة)"),
-    cz_CZ = T("Módy", "Nejsou nainstalovány žádné módy používající NativeSettings!", "Jazyk rozhraní", "Jazyk nabídky Native Settings. Auto se řídí jazykem herního rozhraní.", "Auto (jazyk hry)"),
-    de_DE = T("Mods", "Keine Mods installiert, die NativeSettings nutzen!", "UI-Sprache", "Sprache des Native-Settings-Menüs. Auto folgt der Spieloberfläche.", "Auto (Spielsprache)"),
-    es_ES = T("Mods", "¡No hay mods instalados que usen NativeSettings!", "Idioma de la interfaz", "Idioma del menú de Native Settings. Auto sigue el idioma de la interfaz del juego.", "Auto (idioma del juego)"),
-    es_MX = T("Mods", "¡No hay mods instalados que usen NativeSettings!", "Idioma de la interfaz", "Idioma del menú de Native Settings. Auto sigue el idioma de la interfaz del juego.", "Auto (idioma del juego)"),
-    fr_FR = T("Mods", "Aucun mod utilisant NativeSettings n'est installé !", "Langue de l'interface", "Langue du menu Native Settings. Auto suit la langue de l'interface du jeu.", "Auto (langue du jeu)"),
-    hu_HU = T("Modok", "Nincs NativeSettings-et használó mod telepítve!", "Felület nyelve", "A Native Settings menü nyelve. Az Auto a játék felületének nyelvét követi.", "Auto (játék nyelve)"),
-    it_IT = T("Mod", "Nessuna mod che usa NativeSettings installata!", "Lingua interfaccia", "Lingua del menu Native Settings. Auto segue la lingua dell'interfaccia di gioco.", "Auto (lingua di gioco)"),
-    jp_JP = T("MOD", "NativeSettings を使用する MOD がインストールされていません！", "UI言語", "Native Settings メニューの言語。「自動」はゲームのインターフェース言語に従います。", "自動（ゲーム言語）"),
-    kr_KR = T("모드", "NativeSettings를 사용하는 모드가 설치되어 있지 않습니다!", "UI 언어", "Native Settings 메뉴 언어. 자동은 게임 인터페이스 언어를 따릅니다.", "자동 (게임 언어)"),
-    pl_PL = T("Mody", "Brak zainstalowanych modów korzystających z NativeSettings!", "Język interfejsu", "Język menu Native Settings. Auto podąża za językiem interfejsu gry.", "Auto (język gry)"),
-    pt_BR = T("Mods", "Nenhum mod que usa NativeSettings instalado!", "Idioma da interface", "Idioma do menu Native Settings. Automático segue o idioma da interface do jogo.", "Auto (idioma do jogo)"),
-    ru_RU = T("Моды", "Нет модов, использующих NativeSettings!", "Язык интерфейса", "Язык меню Native Settings. Авто — язык интерфейса игры.", "Авто (язык игры)"),
-    th_TH = T("ม็อด", "ไม่มีม็อดที่ใช้ NativeSettings ติดตั้งอยู่!", "ภาษาของ UI", "ภาษาเมนู Native Settings โหมดอัตโนมัติจะตามภาษาอินเทอร์เฟซของเกม", "อัตโนมัติ (ภาษาเกม)"),
-    tr_TR = T("Modlar", "NativeSettings kullanan yüklü mod yok!", "Arayüz Dili", "Native Settings menü dili. Otomatik, oyun arayüz dilini takip eder.", "Otomatik (Oyun Dili)"),
-    ua_UA = T("Моди", "Немає встановлених модів, що використовують NativeSettings!", "Мова інтерфейсу", "Мова меню Native Settings. Авто слідує за мовою ігрового інтерфейсу.", "Авто (мова гри)"),
-    zh_CN = T("模组", "没有使用 NativeSettings 的模组！", "界面语言", "Native Settings 菜单语言。自动跟随游戏界面语言。", "自动（游戏语言）"),
-    zh_TW = T("模組", "沒有使用 NativeSettings 的模組！", "介面語言", "Native Settings 選單語言。自動跟隨遊戲介面語言。", "自動（遊戲語言）"),
+    ar_AR = T("التعديلات", "لا توجد تعديلات تستخدم NativeSettings!", "لغة الواجهة", "لغة قائمة Native Settings. تلقائي يتبع لغة واجهة اللعبة.", "تلقائي (لغة اللعبة)", "إعدادات Native", "لا شيء"),
+    cz_CZ = T("Módy", "Nejsou nainstalovány žádné módy používající NativeSettings!", "Jazyk rozhraní", "Jazyk nabídky Native Settings. Auto se řídí jazykem herního rozhraní.", "Auto (jazyk hry)", "Nativní nastavení", "Žádné"),
+    de_DE = T("Mods", "Keine Mods installiert, die NativeSettings nutzen!", "UI-Sprache", "Sprache des Native-Settings-Menüs. Auto folgt der Spieloberfläche.", "Auto (Spielsprache)", "Native Einstellungen", "Keine"),
+    es_ES = T("Mods", "¡No hay mods instalados que usen NativeSettings!", "Idioma de la interfaz", "Idioma del menú de Native Settings. Auto sigue el idioma de la interfaz del juego.", "Auto (idioma del juego)", "Ajustes nativos", "Ninguno"),
+    es_MX = T("Mods", "¡No hay mods instalados que usen NativeSettings!", "Idioma de la interfaz", "Idioma del menú de Native Settings. Auto sigue el idioma de la interfaz del juego.", "Auto (idioma del juego)", "Configuración nativa", "Ninguno"),
+    fr_FR = T("Mods", "Aucun mod utilisant NativeSettings n'est installé !", "Langue de l'interface", "Langue du menu Native Settings. Auto suit la langue de l'interface du jeu.", "Auto (langue du jeu)", "Paramètres natifs", "Aucun"),
+    hu_HU = T("Modok", "Nincs NativeSettings-et használó mod telepítve!", "Felület nyelve", "A Native Settings menü nyelve. Az Auto a játék felületének nyelvét követi.", "Auto (játék nyelve)", "Natív beállítások", "Nincs"),
+    it_IT = T("Mod", "Nessuna mod che usa NativeSettings installata!", "Lingua interfaccia", "Lingua del menu Native Settings. Auto segue la lingua dell'interfaccia di gioco.", "Auto (lingua di gioco)", "Impostazioni native", "Nessuno"),
+    jp_JP = T("MOD", "NativeSettings を使用する MOD がインストールされていません！", "UI言語", "Native Settings メニューの言語。「自動」はゲームのインターフェース言語に従います。", "自動（ゲーム言語）", "ネイティブ設定", "なし"),
+    kr_KR = T("모드", "NativeSettings를 사용하는 모드가 설치되어 있지 않습니다!", "UI 언어", "Native Settings 메뉴 언어. 자동은 게임 인터페이스 언어를 따릅니다.", "자동 (게임 언어)", "네이티브 설정", "없음"),
+    pl_PL = T("Mody", "Brak zainstalowanych modów korzystających z NativeSettings!", "Język interfejsu", "Język menu Native Settings. Auto podąża za językiem interfejsu gry.", "Auto (język gry)", "Ustawienia natywne", "Brak"),
+    pt_BR = T("Mods", "Nenhum mod que usa NativeSettings instalado!", "Idioma da interface", "Idioma do menu Native Settings. Automático segue o idioma da interface do jogo.", "Auto (idioma do jogo)", "Configurações nativas", "Nenhum"),
+    ru_RU = T("Моды", "Нет модов, использующих NativeSettings!", "Язык интерфейса", "Язык меню Native Settings. Авто — язык интерфейса игры.", "Авто (язык игры)", "Нативные настройки", "Нет"),
+    th_TH = T("ม็อด", "ไม่มีม็อดที่ใช้ NativeSettings ติดตั้งอยู่!", "ภาษาของ UI", "ภาษาเมนู Native Settings โหมดอัตโนมัติจะตามภาษาอินเทอร์เฟซของเกม", "อัตโนมัติ (ภาษาเกม)", "การตั้งค่าเนทีฟ", "ไม่มี"),
+    tr_TR = T("Modlar", "NativeSettings kullanan yüklü mod yok!", "Arayüz Dili", "Native Settings menü dili. Otomatik, oyun arayüz dilini takip eder.", "Otomatik (Oyun Dili)", "Yerel Ayarlar", "Yok"),
+    ua_UA = T("Моди", "Немає встановлених модів, що використовують NativeSettings!", "Мова інтерфейсу", "Мова меню Native Settings. Авто слідує за мовою ігрового інтерфейсу.", "Авто (мова гри)", "Нативні налаштування", "Немає"),
+    zh_CN = T("模组", "没有使用 NativeSettings 的模组！", "界面语言", "Native Settings 菜单语言。自动跟随游戏界面语言。", "自动（游戏语言）", "原生设置", "无"),
+    zh_TW = T("模組", "沒有使用 NativeSettings 的模組！", "介面語言", "Native Settings 選單語言。自動跟隨遊戲介面語言。", "自動（遊戲語言）", "原生設定", "無"),
 }
 
 function Localization.normalizeGameCode(code)
