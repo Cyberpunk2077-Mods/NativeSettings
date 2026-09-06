@@ -2,8 +2,8 @@ local nativeSettings = {
     data = {},
 	currentTabPath = nil,
     fromMods = false,
-    modsButtonId = "Mods", -- Stable English identity; never use translated label for identity checks
-    modsDisplayLabel = "Mods",
+    modsButtonId = "Native Mods", -- Stable English identity; never use translated label for identity checks
+    modsDisplayLabel = "Native Mods",
     minCETVersion = 1.25,
     settingsMainController = nil,
     settingsOptionsList = nil,
@@ -90,16 +90,15 @@ registerForEvent("onInit", function()
         wrapped()
     end)
 
-    Observe("SingleplayerMenuGameController", "OnTooltipContainerSpawned", function (this) -- Add "Mods" menu button for inital main menu load
+    Observe("SingleplayerMenuGameController", "OnTooltipContainerSpawned", function (this) -- Add "Native Mods" menu button for inital main menu load
         this:ShowActionsList()
     end)
 
-    Observe("gameuiMenuItemListGameController", "AddMenuItem", function (this, _, spawnEvent) -- Add "Mods" menu button
+    Observe("gameuiMenuItemListGameController", "AddMenuItem", function (this, _, spawnEvent) -- Add "Native Mods" menu button
         if spawnEvent.value == "OnSwitchToSettings" then
             local data = PauseMenuListItemData.new()
-            -- The game resolves this field as a localization key. Arbitrary translated text is treated as
-            -- a missing key and renders as an empty menu slot, so keep the built-in stable key here.
-            data.label = nativeSettings.modsButtonId
+            -- Menu data carries resolved display text; activation accepts this localized label.
+            data.label = nativeSettings.modsDisplayLabel
             data.eventName = "OnSwitchToSettings"
             data.action = PauseMenuAction.OpenSubMenu
             this.menuListController:PushData(data)
@@ -1474,7 +1473,7 @@ function nativeSettings.switchToPreviousPage(settingsController, fromPriorMenu)
     end
 end
 
--- Identity check for the Mods menu button: English id stays stable even when display label is translated.
+-- Identity check for the Native Mods menu button: English id stays stable even when display label is translated.
 function nativeSettings.isModsMenuLabel(label)
     if label == nil then return false end
     local labelStr = tostring(label)
