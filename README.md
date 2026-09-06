@@ -1,7 +1,7 @@
 
 
 # Native Settings
-A small mod for Cyberpunk 2077 that allows other mods to easily add settings options to a custom, fully native UI `Mods` settings menu. User-friendly and fully controller compatible.
+A small mod for Cyberpunk 2077 that allows other mods to easily add settings options to a custom, fully native UI `Native Mod Settings` menu. User-friendly and fully controller compatible.
 
 ![](https://cdn.jsdelivr.net/gh/justarandomguyintheinternet/keanuWheeze/nativeSettingsImages/main.gif)
 ### How to use:

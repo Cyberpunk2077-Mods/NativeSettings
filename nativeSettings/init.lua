@@ -2,8 +2,9 @@ local nativeSettings = {
     data = {},
 	currentTabPath = nil,
     fromMods = false,
-    modsButtonId = "Native Mods", -- Stable English identity; never use translated label for identity checks
-    modsDisplayLabel = "Native Mods",
+    modsButtonId = "Native Mod Settings", -- Stable English identity; never use translated label for identity checks
+    legacyModsButtonId = "Native Mods",
+    modsDisplayLabel = "Native Mod Settings",
     minCETVersion = 1.25,
     settingsMainController = nil,
     settingsOptionsList = nil,
@@ -90,11 +91,11 @@ registerForEvent("onInit", function()
         wrapped()
     end)
 
-    Observe("SingleplayerMenuGameController", "OnTooltipContainerSpawned", function (this) -- Add "Native Mods" menu button for inital main menu load
+    Observe("SingleplayerMenuGameController", "OnTooltipContainerSpawned", function (this) -- Add the Native Mod Settings button on initial main menu load
         this:ShowActionsList()
     end)
 
-    Observe("gameuiMenuItemListGameController", "AddMenuItem", function (this, _, spawnEvent) -- Add "Native Mods" menu button
+    Observe("gameuiMenuItemListGameController", "AddMenuItem", function (this, _, spawnEvent) -- Add the Native Mod Settings menu button
         if spawnEvent.value == "OnSwitchToSettings" then
             local data = PauseMenuListItemData.new()
             -- Menu data carries resolved display text; activation accepts this localized label.
@@ -1473,11 +1474,11 @@ function nativeSettings.switchToPreviousPage(settingsController, fromPriorMenu)
     end
 end
 
--- Identity check for the Native Mods menu button: English id stays stable even when display label is translated.
+-- Identity check for the Native Mod Settings menu button: English id stays stable even when the display label is translated.
 function nativeSettings.isModsMenuLabel(label)
     if label == nil then return false end
     local labelStr = tostring(label)
-    return labelStr == nativeSettings.modsButtonId or labelStr == nativeSettings.modsDisplayLabel
+    return labelStr == nativeSettings.modsButtonId or labelStr == nativeSettings.legacyModsButtonId or labelStr == nativeSettings.modsDisplayLabel
 end
 
 function nativeSettings.loadConfig()
