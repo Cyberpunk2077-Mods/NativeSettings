@@ -2,7 +2,7 @@ local nativeSettings = {
     data = {},
 	currentTabPath = nil,
     fromMods = false,
-    modsButtonId = "Native Mod Settings", -- Stable English identity; never use translated label for identity checks
+    modsButtonId = "Mods", -- Stable English identity; never use translated label for identity checks
     legacyModsButtonId = "Native Mods",
     modsDisplayLabel = "Native Mod Settings",
     minCETVersion = 1.25,
@@ -99,7 +99,7 @@ registerForEvent("onInit", function()
         if spawnEvent.value == "OnSwitchToSettings" then
             local data = PauseMenuListItemData.new()
             -- Menu data carries resolved display text; activation accepts this localized label.
-            data.label = nativeSettings.modsDisplayLabel
+            data.label = nativeSettings.modsButtonId
             data.eventName = "OnSwitchToSettings"
             data.action = PauseMenuAction.OpenSubMenu
             this.menuListController:PushData(data)
