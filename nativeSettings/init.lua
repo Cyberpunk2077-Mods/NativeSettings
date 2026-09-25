@@ -1533,7 +1533,8 @@ end
 function nativeSettings.applyLanguage()
     local loc = nativeSettings.Localization
     nativeSettings.activeLocale = loc.resolveLocale(nativeSettings.config.language)
-    nativeSettings.modsButtonId = loc.MODS_BUTTON_ID
+    -- Keep the menu identity stable for MCM framework-menu redirection.
+    nativeSettings.modsButtonId = "Mods"
     nativeSettings.modsDisplayLabel = loc.get(nativeSettings.activeLocale, "mods")
 
     if nativeSettings.data["noMod"] then
